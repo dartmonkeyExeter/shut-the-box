@@ -36,49 +36,60 @@ def eliminate_numbers(box, to_eliminate):
 def play_game():
     
     players = get_player_names(get_number_of_players())
-    points = []
-
-    for player in players:
-        print("It's " + player + "'s turn!")
-        box = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-        total = 0
-        while True:
-            total = roll_dice()
-
-            if 7 not in box and 8 not in box and 9 not in box:
-                roll_two_dice = input("Roll 1 or 2 dice? ")
-                if roll_two_dice == "2":
-                    total = roll_dice()
-                elif roll_two_dice == "1":
-                    total = randint(1, 6)
-                else:
-                    print("Invalid input")
-                    continue
-            possible_rolls = get_possible_rolls(box, total)
-            
-            print("Numbers left: ", box)
-            print("Roll: ", total)
-
-            if len(possible_rolls) == 0:
-                print("no possible moves")
-                points.append(sum(box))
-                break
-
+    points = [0 for i in range(len(players))]
+    while players:
+        for player in players:
+            print("It's " + player + "'s turn!")
+            box = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+            total = 0
             while True:
-                try:
-                    to_eliminate = input("Numbers to eliminate (as comma separated list): ")
-                    to_eliminate = to_eliminate.split(",")
-                    to_eliminate = [int(i) for i in to_eliminate]
-                    to_eliminate.sort()
-                    to_eliminate = tuple(to_eliminate)
-                except ValueError:
-                    print("Invalid input")
-                    continue
-                if to_eliminate in combinations(box, len(to_eliminate)) and sum(to_eliminate) == total:
-                    box = eliminate_numbers(box, to_eliminate)                
-                    break 
+                total = roll_dice()
 
-    for idx, player in enumerate(players):
-        print(player + ": " + str(points[idx]))
+                if 7 not in box and 8 not in box and 9 not in box:
+                    roll_two_dice = input("Roll 1 or 2 dice? ")
+                    if roll_two_dice == "2":
+                        total = roll_dice()
+                    elif roll_two_dice == "1":
+                        total = randint(1, 6)
+                    else:
+                        print("Invalid input")
+                        continue
+                possible_rolls = get_possible_rolls(box, total)
+                
+                print("Numbers left: ", box)
+                print("Roll: ", total)
+
+                if len(possible_rolls) == 0:
+                    print("no possible moves")
+                    points[players.index(player)] += sum(box)
+                    break
+
+                while True:
+                    try:
+                        to_eliminate = input("Numbers to eliminate (as comma separated list): ")
+                        to_eliminate = to_eliminate.split(",")
+                        to_eliminate = [int(i) for i in to_eliminate]
+                        to_eliminate.sort()
+                        to_eliminate = tuple(to_eliminate)
+                    except ValueError:
+                        print("Invalid input")
+                        continue
+                    if to_eliminate in combinations(box, len(to_eliminate)) and sum(to_eliminate) == total:
+                        box = eliminate_numbers(box, to_eliminate)                
+                        break 
+
+        for idx, player in enumerate(players):
+            print(player + ": " + str(points[idx]))
+
+        for i in range(len(players)):
+            if points[i - 1] >= 45:
+                print(players[i - 1] + " lost!")
+                players.pop(i - 1)
+                points.pop(i - 1)
+                break
+        
+        if len(players) == 1:
+            print(players[0] + " won!")
+            break
+
 play_game()
-
